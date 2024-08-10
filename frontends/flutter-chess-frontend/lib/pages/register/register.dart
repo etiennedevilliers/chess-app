@@ -1,31 +1,40 @@
+import 'package:chess_frontend/apis/api_exception.dart';
+import 'package:chess_frontend/apis/user/user_api.dart';
 import 'package:chess_frontend/cubits/authentication/authentication_cubit.dart';
-import 'package:chess_frontend/pages/register/register.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController unique = TextEditingController();
   final TextEditingController password = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  void login() {
+  Future<void> register() async {
     if (_formKey.currentState!.validate()) {
-      GetIt.I<AuthenticationCubit>().login(
+      try {
+        await UserApi.create(
           unique: unique.text,
           password: password.text
-      );
+        );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logging in...')),
-      );
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      } on ApiException catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.reason)),
+          );
+        }
+      }
     }
   }
 
@@ -72,22 +81,14 @@ class _LoginPageState extends State<LoginPage> {
       mainAxisSize: MainAxisSize.max,
       children: [
         ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => const RegisterPage(),
-            ));
-          },
+          onPressed: register,
           child: const Text('Register'),
         ),
-        ElevatedButton(
-          onPressed: login,
-          child: const Text('Login'),
-        )
       ],
     );
   }
 
-  Widget buildLoginForm() {
+  Widget buildRegisterForm() {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(
@@ -114,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Login"),
+        title: const Text("Register"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -138,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
                 );
               }
 
-              return buildLoginForm();
+              return buildRegisterForm();
             },
           ),
         ),
