@@ -25,6 +25,16 @@ class UserApi {
 
       if (response.statusCode == 201) {
         return User.fromMap(jsonDecode(response.body));
+      } else if (response.statusCode == 400) {
+        Map<String, dynamic> body = jsonDecode(response.body);
+
+        if (body["error"] == "validation-error") {
+          throw ApiException(reason: body['reason'][0]['message'].toString());
+        } else if (response.statusCode == 400) {
+          Map<String, dynamic> body = jsonDecode(response.body);
+
+          throw ApiException(reason: body['reason'].toString());
+        }
       }
 
       throw ApiException(reason: 'Unknown status code ${response.statusCode}');

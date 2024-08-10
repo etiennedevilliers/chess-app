@@ -23,7 +23,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
     String? jwt = GetIt.I<SharedPreferences>().getString('jwt');
     String? user = GetIt.I<SharedPreferences>().getString('user');
 
-    if (jwt == null || user == null) {
+    if ((jwt == null || user == null) || (jwt.isEmpty || user.isEmpty)) {
       emit(AuthenticationLoggedOutState());
       return;
     }
@@ -51,5 +51,12 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
     } catch (error, stackTrace) {
       emit(AuthenticationErrorState(error: error, stackTrace: stackTrace));
     }
+  }
+
+  Future<void> logout() async {
+    await GetIt.I<SharedPreferences>().setString('user', '');
+    await GetIt.I<SharedPreferences>().setString('jwt', ''); 
+
+    emit(AuthenticationLoggedOutState());
   }
 }
