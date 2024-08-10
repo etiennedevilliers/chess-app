@@ -8,4 +8,10 @@ class User {
       unique: map['unique'] as String
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'unique': unique
+    };
+  }
 }
